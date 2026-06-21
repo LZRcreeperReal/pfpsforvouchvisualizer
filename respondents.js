@@ -32,7 +32,9 @@ function buildResponses(users){
   const arr = [];
 
   for(let i = 0; i < 150; i++){
-    const user = pick(users) || "user";
+    const user = Array.isArray(users) && users.length
+    ? pick(users)
+    : "user";
 
     const msg = Math.random() < 0.6
       ? pick(templates).replaceAll("{user}", user)
