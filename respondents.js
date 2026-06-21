@@ -1,47 +1,47 @@
+function pick(arr){
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+const templates = [
+  "vouch for {user}",
+  "vouch {user}",
+  "{user} is legit",
+  "did a deal with {user} vouch",
+  "traded with {user} all good",
+  "{user} fast and trusted",
+  "easy deal with {user}",
+  "can vouch for {user}",
+  "{user} legit af",
+  "{user} is safe",
+  "smooth deal with {user}",
+  "vouch 100% {user}"
+];
+
 const positives = [
   "vouch",
   "vouch legit",
-  "vouch 100%",
   "100% legit",
   "smooth deal",
   "fast and easy",
   "all good",
   "no issues",
-  "perfect trade",
-  "went smooth",
-  "trustworthy",
-  "quick and clean",
-  "solid",
-  "safe deal",
-  "would vouch again"
+  "perfect trade"
 ];
 
-const templates = [
-  "vouch for {user}",
-  "vouch {user}",
-  "vouch for {user} legit",
-  "{user} is legit",
-  "did a deal with {user} vouch",
-  "traded with {user} all good",
-  "vouching {user} was smooth",
-  "{user} fast and trusted",
-  "vouch for {user} 100%",
-  "{user} went first all good",
-  "easy deal with {user}",
-  "can vouch for {user}",
-  "vouch {user} no problems",
-  "{user} legit af",
-  "{user} is safe"
-];
+function buildResponses(users){
+  const arr = [];
 
-const extras = ["", "", "", " fr", " ngl", " lol", " tbh", " honestly", " no cap", "..."];
+  for(let i = 0; i < 150; i++){
+    const user = pick(users) || "user";
 
-function pick(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
+    const msg = Math.random() < 0.6
+      ? pick(templates).replaceAll("{user}", user)
+      : `${pick(positives)} ${user}`;
+
+    arr.push(msg);
+  }
+
+  return arr;
 }
 
-function format(msg, user){
-  return msg.replaceAll("{user}", user);
-}
-
-window.responses = { templates, positives, extras };
+window.buildResponses = buildResponses;
