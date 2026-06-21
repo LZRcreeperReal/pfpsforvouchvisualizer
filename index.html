@@ -3,12 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Voucher Visual</title>
+<title>Discord Message Builder</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-
-<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <style>
 :root{
@@ -26,16 +23,14 @@ body{
   color:var(--text);
 }
 
-/* TOP BAR */
 nav{
-  padding:14px 20px;
   background:#1e1f22;
+  padding:14px 20px;
   font-weight:600;
 }
 
-/* LAYOUT */
 .container{
-  max-width:800px;
+  max-width:900px;
   margin:auto;
   padding:20px;
 }
@@ -44,8 +39,8 @@ input,button{
   width:100%;
   padding:10px;
   margin:8px 0;
-  border-radius:6px;
   border:none;
+  border-radius:6px;
   background:#1e1f22;
   color:white;
 }
@@ -56,31 +51,36 @@ button{
   font-weight:600;
 }
 
-/* DISCORD FEED */
-.feed{
-  margin-top:20px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+.layout{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:20px;
 }
 
-/* MESSAGE */
+.feed{
+  background:#2b2d31;
+  padding:15px;
+  border-radius:8px;
+  min-height:400px;
+}
+
 .msg{
   display:flex;
   gap:12px;
-  padding:6px 0;
+  margin-bottom:12px;
 }
 
 .avatar{
   width:40px;
   height:40px;
   border-radius:50%;
-  background:#5865f2;
+  overflow:hidden;
+  background:var(--accent);
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:700;
-  overflow:hidden;
+  flex-shrink:0;
 }
 
 .avatar img{
@@ -89,200 +89,174 @@ button{
   object-fit:cover;
 }
 
-.content{
-  display:flex;
-  flex-direction:column;
-}
-
-.top{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-
 .name{
   font-weight:600;
 }
 
-.time{
-  font-size:12px;
-  color:var(--muted);
-}
-
 .text{
   color:#cdd0d5;
-  margin-top:2px;
 }
 </style>
 </head>
 
 <body>
 
-<nav>Voucher Visual Builder</nav>
+<nav>Discord Message Builder</nav>
 
 <div class="container">
 
-<input id="username" placeholder="Your username"/>
+<div class="layout">
 
-<input id="pfpUpload" type="file"/>
+<!-- LEFT CONTROLS -->
+<div>
 
-<button onclick="generate()">Generate</button>
-<button onclick="exportProject()">Download Deployable Site</button>
+<input id="username" placeholder="Username"/>
+<input id="message" placeholder="Message"/>
 
+<input type="file" id="pfp"/>
+
+<button onclick="addMessage()">Add Message</button>
+<button onclick="downloadHTML()">Download Single HTML</button>
+
+</div>
+
+<!-- RIGHT PREVIEW -->
 <div class="feed" id="feed"></div>
 
 </div>
 
+</div>
+
 <script>
-/* =======================
-   DATA
-======================= */
+let messages = [];
+let currentPFP = null;
 
-const usernames = [
-  "saturn","clouded","vyn","mei","angelic","faded","nova",
-  "ghost","frosted","voided","sleepy","lotus","orbit",
-  "catlawyer","breaddealer","goober","microwave"
-];
-
-const responses = [
-  "yeah ur good","its fine","all good","that worked",
-  "yea i got it","looks good","no issues","seems fine",
-  "thx again","nice","clean","perfect honestly",
-  "yeah works","it came through","yep got it","we good"
-];
-
-let senderPFP = null;
-let generated = [];
-
-/* =======================
-   HELPERS
-======================= */
-
-function pick(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
-}
-
-function initials(name){
-  return name.slice(0,2).toUpperCase();
-}
-
-/* =======================
-   LOAD PFP
-======================= */
-
-document.getElementById("pfpUpload").addEventListener("change", e=>{
+/* PFP UPLOAD */
+document.getElementById("pfp").addEventListener("change", e=>{
   const file = e.target.files[0];
   if(!file) return;
 
   const reader = new FileReader();
-  reader.onload = () => senderPFP = reader.result;
+  reader.onload = () => currentPFP = reader.result;
   reader.readAsDataURL(file);
 });
 
-/* =======================
-   GENERATE
-======================= */
+/* ADD MESSAGE */
+function addMessage(){
 
-function generate(){
+  const user = document.getElementById("username").value || "user";
+  const text = document.getElementById("message").value || "message";
+
+  messages.push({
+    user,
+    text,
+    pfp: currentPFP
+  });
+
+  render();
+}
+
+/* RENDER PREVIEW */
+function render(){
+
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
-  generated = [];
 
-  for(let i=0;i<12;i++){
-
-    const user = pick(usernames);
-    const msg = pick(responses);
-
-    generated.push({user,msg});
-
+  messages.forEach(m=>{
     const div = document.createElement("div");
     div.className = "msg";
 
-    const avatarHTML = `<div class="avatar">${initials(user)}</div>`;
-
     div.innerHTML = `
-      ${avatarHTML}
-      <div class="content">
-        <div class="top">
-          <div class="name">${user}</div>
-          <div class="time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
-        </div>
-        <div class="text">${msg}</div>
+      <div class="avatar">
+        ${m.pfp ? `<img src="${m.pfp}">` : m.user.slice(0,2).toUpperCase()}
+      </div>
+      <div>
+        <div class="name">${m.user}</div>
+        <div class="text">${m.text}</div>
       </div>
     `;
 
     feed.appendChild(div);
-  }
+  });
+
 }
 
-/* =======================
-   EXPORT
-======================= */
+/* EXPORT SINGLE FILE HTML */
+function downloadHTML(){
 
-function exportProject(){
-
-  if(!generated.length){
-    alert("Generate first");
-    return;
-  }
-
-  const zip = new JSZip();
-
-  const html = `
+const html = `
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Voucher Visual</title>
+<title>Discord Export</title>
 <style>
 body{
   margin:0;
   background:#313338;
-  color:#dbdee1;
   font-family:Arial;
+  color:#dbdee1;
+  padding:20px;
 }
-.container{max-width:700px;margin:auto;padding:20px;}
-.msg{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #444;}
-.avatar{width:40px;height:40px;border-radius:50%;background:#5865f2;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;}
-.name{font-weight:bold;}
-.text{color:#cdd0d5;}
+
+.msg{
+  display:flex;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#5865f2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  flex-shrink:0;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+}
+
+.name{
+  font-weight:bold;
+}
+
+.text{
+  color:#cdd0d5;
+}
 </style>
 </head>
 <body>
 
-<div class="container">
-
-${generated.map(v=>`
+${messages.map(m=>`
   <div class="msg">
-    <div class="avatar">${v.user.slice(0,2).toUpperCase()}</div>
+    <div class="avatar">
+      ${m.pfp ? `<img src="${m.pfp}">` : m.user.slice(0,2).toUpperCase()}
+    </div>
     <div>
-      <div class="name">${v.user}</div>
-      <div class="text">${v.msg}</div>
+      <div class="name">${m.user}</div>
+      <div class="text">${m.text}</div>
     </div>
   </div>
 `).join("")}
-
-</div>
 
 </body>
 </html>
 `;
 
-  zip.file("index.html", html);
-  zip.file("vercel.json", JSON.stringify({
-    version:2,
-    builds:[{src:"index.html",use:"@vercel/static"}]
-  },null,2));
-
-  zip.folder("Eboy");
-  zip.folder("Egirl");
-  zip.folder("Meme");
-  zip.folder("Roblox");
-
-  zip.generateAsync({type:"blob"}).then(blob=>{
-    saveAs(blob,"voucher-visual.zip");
-  });
+  const blob = new Blob([html], {type:"text/html"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "discord-export.html";
+  a.click();
 }
+
 </script>
 
 </body>
