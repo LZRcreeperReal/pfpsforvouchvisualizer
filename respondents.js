@@ -1,4 +1,3 @@
-
 const positives = [
   "vouch",
   "vouch legit",
@@ -35,18 +34,7 @@ const templates = [
   "{user} is safe"
 ];
 
-const extras = [
-  "",
-  "",
-  "",
-  " fr",
-  " ngl",
-  " lol",
-  " tbh",
-  " honestly",
-  " no cap",
-  "..."
-];
+const extras = ["", "", "", " fr", " ngl", " lol", " tbh", " honestly", " no cap", "..."];
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
@@ -56,36 +44,4 @@ function format(msg, user){
   return msg.replaceAll("{user}", user);
 }
 
-const responses = new Set();
-
-/* generate 150 responses */
-while(responses.size < 150){
-
-  let msg;
-
-  const type = Math.random();
-
-  // STYLE 1: direct vouch
-  if(type < 0.5){
-    msg = format(pick(templates), user);
-  }
-
-  // STYLE 2: short blunt Discord style
-  else if(type < 0.8){
-    msg = `${pick(positives)} ${user}`;
-  }
-
-  // STYLE 3: human messy sentence
-  else{
-    msg = `${pick(positives)} for ${user} ${pick(extras)}`;
-  }
-
-  // realism noise
-  if(Math.random() < 0.2) msg = msg.replace("you","u");
-  if(Math.random() < 0.1) msg = msg.replace("is","s");
-  if(Math.random() < 0.1) msg += "..."
-
-  responses.add(msg.trim());
-}
-
-window.responses = [...responses];
+window.responses = { templates, positives, extras };
