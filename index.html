@@ -27,6 +27,15 @@ nav{
   padding:20px;
 }
 
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:6px;
+  border:none;
+  outline:none;
+}
+
 button{
   width:100%;
   padding:12px;
@@ -46,7 +55,6 @@ button{
   gap:14px;
 }
 
-/* message */
 .msg{
   display:flex;
   gap:12px;
@@ -64,6 +72,7 @@ button{
   align-items:center;
   justify-content:center;
   font-weight:700;
+  color:white;
 }
 
 .avatar img{
@@ -79,11 +88,6 @@ button{
 .text{
   color:#cdd0d5;
 }
-
-.tag{
-  font-size:11px;
-  color:#949ba4;
-}
 </style>
 </head>
 
@@ -92,6 +96,9 @@ button{
 <nav>Discord Chat Generator</nav>
 
 <div class="container">
+
+<input id="usernameInput" placeholder="Your username"/>
+<input id="pfpInput" type="file" accept="image/*"/>
 
 <button onclick="generate()">Generate Chat (141 messages)</button>
 
@@ -102,12 +109,12 @@ button{
 <!-- DATA FILES -->
 <script src="./usernames.js"></script>
 <script src="./sends.js"></script>
-<script src="./respondents.js"></script>
+<script src="./responses.js"></script>
 
 <script>
 
 /* =========================
-   PFP MANIFEST SYSTEM
+   RANDOM PFP SYSTEM
 ========================= */
 
 const baseURL =
@@ -139,12 +146,6 @@ function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-function time(){
-  return "Today at " +
-    (Math.floor(Math.random()*12)+1) + ":" +
-    String(Math.floor(Math.random()*60)).padStart(2,'0');
-}
-
 /* =========================
    GENERATE CHAT
 ========================= */
@@ -154,26 +155,28 @@ async function generate(){
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
+  const username = document.getElementById("usernameInput").value || "You";
+  const pfpFile = document.getElementById("pfpInput").files[0];
+  const userPfp = pfpFile ? URL.createObjectURL(pfpFile) : null;
+
   const users = window.usernames || [];
   const sends = window.sends || [];
   const responses = window.responses || [];
 
   for(let i=0;i<141;i++){
 
-    const isSender = i % 2 === 0;
+    const isYou = i % 2 === 0;
 
-    let user, text, pfp, tag;
+    let user, text, pfp;
 
-    if(isSender){
-      user = "YOU";
+    if(isYou){
+      user = username;
       text = pick(sends);
-      pfp = null;
-      tag = "sender";
+      pfp = userPfp;
     } else {
       user = pick(users);
       text = pick(responses);
       pfp = await randomPFP();
-      tag = "respondent";
     }
 
     const div = document.createElement("div");
@@ -185,7 +188,7 @@ async function generate(){
       </div>
 
       <div>
-        <div class="name">${user} <span class="tag">${tag}</span></div>
+        <div class="name">${user}</div>
         <div class="text">${text}</div>
       </div>
     `;
