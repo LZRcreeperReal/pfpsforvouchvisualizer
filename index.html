@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Voucher Visual Builder</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet"/>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Inter;
+  background:#0f0f13;
+  color:#e8e0f5;
+}
+
+header{
+  padding:20px;
+  border-bottom:1px solid #2e2b4a;
+  font-family:Sora;
+}
+
+.container{
+  max-width:800px;
+  margin:auto;
+  padding:20px;
+}
+
+input, button{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #2e2b4a;
+  background:#1a1727;
+  color:white;
+  margin:5px 0;
+}
+
+button{
+  background:#7c5cbf;
+  cursor:pointer;
+  font-weight:600;
+}
+
+.preview{
+  margin-top:20px;
+  padding:15px;
+  background:#1a1727;
+  border-radius:10px;
+  border:1px solid #2e2b4a;
+}
+
+.row{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  Voucher Visual Builder
+</header>
+
+<div class="container">
+
+  <div class="row">
+
+    <input id="username" placeholder="Your username"/>
+
+    <input id="pfp" type="file"/>
+
+    <button onclick="generate()">Generate Preview</button>
+    <button onclick="exportProject()">Download Deployable Site</button>
+
+  </div>
+
+  <div class="preview" id="preview">
+    Preview will appear here...
+  </div>
+
+</div>
+
+<script src="./usernames.js"></script>
+<script src="./respondents.js"></script>
+<script src="./sends.js"></script>
+
+<script>
+
+function pick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+let generatedVouches = [];
+
+function generate(){
+
+  const username = document.getElementById("username").value || "user";
+
+  generatedVouches = [];
+
+  for(let i=0;i<15;i++){
+    generatedVouches.push({
+      user: pick(window.usernames),
+      message: pick(window.responses || window.respondents || ["ok"])
+    });
+  }
+
+  renderPreview();
+}
+
+function renderPreview(){
+  const el = document.getElementById("preview");
+
+  el.innerHTML = generatedVouches.map(v => `
+    <div style="padding:8px;border-bottom:1px solid #2e2b4a">
+      <b>${v.user}</b>: ${v.message}
+    </div>
+  `).join("");
+}
+
+/* =========================
+   EXPORT DEPLOYABLE SITE
+========================= */
+
+async function exportProject(){
+
+  if(!generatedVouches.length){
+    alert("Generate first");
+    return;
+  }
+
+  const zip = new JSZip();
+
+  const vercelConfig = {
+    version: 2,
+    builds: [{ src: "index.html", use: "@vercel/static" }]
+  };
+
+  const vvTemplate = `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Voucher Visual</title>
+<style>
+body{
+  background:#0f0f13;
+  color:#e8e0f5;
+  font-family:Inter;
+}
+.feed{
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+}
+.msg{
+  padding:10px;
+  border-bottom:1px solid #2e2b4a;
+}
+</style>
+</head>
+
+<body>
+
+<div class="feed">
+  __VOUCHES__
+</div>
+
+</body>
+
+<script>
+</script>
+
+</html>
+`;
+
+  const vouchHTML = generatedVouches.map(v => `
+    <div class="msg">
+      <b>${v.user}</b><br/>
+      ${v.message}
+    </div>
+  `).join("");
+
+  const finalHTML = vvTemplate.replace("__VOUCHES__", vouchHTML);
+
+  zip.file("index.html", finalHTML);
+  zip.file("vercel.json", JSON.stringify(vercelConfig,null,2));
+
+  zip.folder("Eboy");
+  zip.folder("Egirl");
+  zip.folder("Meme");
+  zip.folder("Roblox");
+
+  const blob = await zip.generateAsync({type:"blob"});
+  saveAs(blob,"voucher-visual-deploy.zip");
+}
+
+</script>
+
+</body>
+</html>
