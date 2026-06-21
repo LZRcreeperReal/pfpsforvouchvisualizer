@@ -11,23 +11,22 @@ const base = [
   "you got it?"
 ];
 
-const endings = ["", "", "", "?", " lol", " fr", ""];
+const endings = ["","?"," lol"," fr",""];
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+function pick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
 }
 
-const sends = new Set();
+const sends = [];
 
-while (sends.size < 100) {
+while(sends.length < 100){
   let msg = pick(base) + pick(endings);
 
-  // inconsistent typing like real Discord
-  if (Math.random() < 0.2) msg = msg.replace("you", "u");
-  if (Math.random() < 0.1) msg = msg.replace("are", "r");
-  if (Math.random() < 0.1) msg = msg.toLowerCase();
+  if(Math.random() < 0.2) msg = msg.replace("you","u");
+  if(Math.random() < 0.1) msg = msg.toLowerCase();
 
-  sends.add(msg);
+  sends.push(msg);
 }
 
-module.exports = [...sends];
+// 🔥 CRITICAL LINE
+window.sends = sends;
