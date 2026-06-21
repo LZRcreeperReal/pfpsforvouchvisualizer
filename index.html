@@ -5,26 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Voucher Visual</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
 <style>
+:root{
+  --bg:#313338;
+  --panel:#2b2d31;
+  --text:#dbdee1;
+  --muted:#949ba4;
+  --accent:#5865f2;
+}
+
 body{
   margin:0;
-  background:#0f0f13;
-  color:#e8e0f5;
+  background:var(--bg);
   font-family:Inter;
+  color:var(--text);
 }
 
+/* TOP BAR */
 nav{
   padding:14px 20px;
-  border-bottom:1px solid #2e2b4a;
-  font-family:Sora;
-  font-weight:700;
+  background:#1e1f22;
+  font-weight:600;
 }
 
+/* LAYOUT */
 .container{
   max-width:800px;
   margin:auto;
@@ -32,32 +41,77 @@ nav{
 }
 
 input,button{
-  display:block;
   width:100%;
-  margin:10px 0;
   padding:10px;
-  border-radius:8px;
-  border:1px solid #2e2b4a;
-  background:#1a1727;
+  margin:8px 0;
+  border-radius:6px;
+  border:none;
+  background:#1e1f22;
   color:white;
 }
 
 button{
-  background:#7c5cbf;
+  background:var(--accent);
   cursor:pointer;
   font-weight:600;
 }
 
+/* DISCORD FEED */
 .feed{
   margin-top:20px;
   display:flex;
   flex-direction:column;
-  gap:10px;
+  gap:14px;
 }
 
+/* MESSAGE */
 .msg{
-  padding:10px;
-  border-bottom:1px solid #2e2b4a;
+  display:flex;
+  gap:12px;
+  padding:6px 0;
+}
+
+.avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:#5865f2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  overflow:hidden;
+}
+
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.content{
+  display:flex;
+  flex-direction:column;
+}
+
+.top{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.name{
+  font-weight:600;
+}
+
+.time{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.text{
+  color:#cdd0d5;
+  margin-top:2px;
 }
 </style>
 </head>
@@ -70,6 +124,8 @@ button{
 
 <input id="username" placeholder="Your username"/>
 
+<input id="pfpUpload" type="file"/>
+
 <button onclick="generate()">Generate</button>
 <button onclick="exportProject()">Download Deployable Site</button>
 
@@ -78,73 +134,99 @@ button{
 </div>
 
 <script>
-/* =========================
-   SAFE INTERNAL DATA
-========================= */
+/* =======================
+   DATA
+======================= */
 
 const usernames = [
-  "saturn","clouded","vyn","mei","angelic","faded","nova","rynn",
-  "ghost","frosted","voided","sleepy","lotus","haze","orbit",
-  "catlawyer","breaddealer","microwave","goober","toaster"
+  "saturn","clouded","vyn","mei","angelic","faded","nova",
+  "ghost","frosted","voided","sleepy","lotus","orbit",
+  "catlawyer","breaddealer","goober","microwave"
 ];
 
 const responses = [
-  "yeah ur good","its fine","all good","that worked","yea i got it",
-  "looks good","no issues","seems fine","all set","thx again",
-  "nice","clean","perfect honestly","yeah works","it came through",
-  "yep got it","all sorted","we good","its done","no problems"
+  "yeah ur good","its fine","all good","that worked",
+  "yea i got it","looks good","no issues","seems fine",
+  "thx again","nice","clean","perfect honestly",
+  "yeah works","it came through","yep got it","we good"
 ];
 
-/* ========================= */
+let senderPFP = null;
+let generated = [];
 
-let generatedVouches = [];
+/* =======================
+   HELPERS
+======================= */
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* -------------------------
+function initials(name){
+  return name.slice(0,2).toUpperCase();
+}
+
+/* =======================
+   LOAD PFP
+======================= */
+
+document.getElementById("pfpUpload").addEventListener("change", e=>{
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => senderPFP = reader.result;
+  reader.readAsDataURL(file);
+});
+
+/* =======================
    GENERATE
---------------------------*/
+======================= */
+
 function generate(){
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
-  generatedVouches = [];
+  generated = [];
 
-  for(let i=0;i<15;i++){
+  for(let i=0;i<12;i++){
 
-    const v = {
-      user: pick(usernames),
-      message: pick(responses)
-    };
+    const user = pick(usernames);
+    const msg = pick(responses);
 
-    generatedVouches.push(v);
+    generated.push({user,msg});
 
     const div = document.createElement("div");
     div.className = "msg";
-    div.innerHTML = `<b>${v.user}</b><br>${v.message}`;
+
+    const avatarHTML = `<div class="avatar">${initials(user)}</div>`;
+
+    div.innerHTML = `
+      ${avatarHTML}
+      <div class="content">
+        <div class="top">
+          <div class="name">${user}</div>
+          <div class="time">${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</div>
+        </div>
+        <div class="text">${msg}</div>
+      </div>
+    `;
+
     feed.appendChild(div);
   }
 }
 
-/* -------------------------
-   EXPORT (Vercel-ready ZIP)
---------------------------*/
+/* =======================
+   EXPORT
+======================= */
+
 function exportProject(){
 
-  if(!generatedVouches.length){
+  if(!generated.length){
     alert("Generate first");
     return;
   }
 
   const zip = new JSZip();
-
-  const vercelConfig = {
-    version: 2,
-    builds: [
-      { src: "index.html", use: "@vercel/static" }
-    ]
-  };
 
   const html = `
 <!DOCTYPE html>
@@ -155,29 +237,28 @@ function exportProject(){
 <style>
 body{
   margin:0;
-  background:#0f0f13;
-  color:#e8e0f5;
+  background:#313338;
+  color:#dbdee1;
   font-family:Arial;
 }
-.container{
-  max-width:700px;
-  margin:auto;
-  padding:20px;
-}
-.msg{
-  padding:10px;
-  border-bottom:1px solid #2e2e2e;
-}
+.container{max-width:700px;margin:auto;padding:20px;}
+.msg{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid #444;}
+.avatar{width:40px;height:40px;border-radius:50%;background:#5865f2;display:flex;align-items:center;justify-content:center;font-weight:bold;color:white;}
+.name{font-weight:bold;}
+.text{color:#cdd0d5;}
 </style>
 </head>
 <body>
 
 <div class="container">
 
-${generatedVouches.map(v => `
+${generated.map(v=>`
   <div class="msg">
-    <b>${v.user}</b><br/>
-    ${v.message}
+    <div class="avatar">${v.user.slice(0,2).toUpperCase()}</div>
+    <div>
+      <div class="name">${v.user}</div>
+      <div class="text">${v.msg}</div>
+    </div>
   </div>
 `).join("")}
 
@@ -188,15 +269,18 @@ ${generatedVouches.map(v => `
 `;
 
   zip.file("index.html", html);
-  zip.file("vercel.json", JSON.stringify(vercelConfig, null, 2));
+  zip.file("vercel.json", JSON.stringify({
+    version:2,
+    builds:[{src:"index.html",use:"@vercel/static"}]
+  },null,2));
 
   zip.folder("Eboy");
   zip.folder("Egirl");
   zip.folder("Meme");
   zip.folder("Roblox");
 
-  zip.generateAsync({ type: "blob" }).then(blob => {
-    saveAs(blob, "voucher-visual.zip");
+  zip.generateAsync({type:"blob"}).then(blob=>{
+    saveAs(blob,"voucher-visual.zip");
   });
 }
 </script>
