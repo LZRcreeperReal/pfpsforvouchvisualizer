@@ -175,7 +175,16 @@ async function generate(){
       pfp = userPfp;
     } else {
       user = pick(users);
-      text = pick(responses);
+      const templates = responseData.templates;
+      const positives = responseData.positives;
+
+      const userForMsg = pick(users);
+
+      let raw = Math.random() < 0.6
+        ? pick(templates).replaceAll("{user}", userForMsg)
+        : `${pick(positives)} ${userForMsg}`;
+
+      text = raw;;
       pfp = await randomPFP();
     }
 
