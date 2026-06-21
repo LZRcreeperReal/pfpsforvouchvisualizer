@@ -1,26 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Discord Message Builder</title>
+<title>Discord Chat Generator</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 
 <style>
-:root{
-  --bg:#313338;
-  --panel:#2b2d31;
-  --text:#dbdee1;
-  --muted:#949ba4;
-  --accent:#5865f2;
-}
-
 body{
   margin:0;
-  background:var(--bg);
+  background:#313338;
   font-family:Inter;
-  color:var(--text);
+  color:#dbdee1;
 }
 
 nav{
@@ -35,39 +27,30 @@ nav{
   padding:20px;
 }
 
-input,button{
+button{
   width:100%;
-  padding:10px;
-  margin:8px 0;
+  padding:12px;
+  margin:10px 0;
   border:none;
   border-radius:6px;
-  background:#1e1f22;
+  background:#5865f2;
   color:white;
-}
-
-button{
-  background:var(--accent);
-  cursor:pointer;
   font-weight:600;
-}
-
-.layout{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:20px;
+  cursor:pointer;
 }
 
 .feed{
-  background:#2b2d31;
-  padding:15px;
-  border-radius:8px;
-  min-height:400px;
+  margin-top:20px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
+/* message */
 .msg{
   display:flex;
   gap:12px;
-  margin-bottom:12px;
+  align-items:flex-start;
 }
 
 .avatar{
@@ -75,12 +58,12 @@ button{
   height:40px;
   border-radius:50%;
   overflow:hidden;
-  background:var(--accent);
+  background:#5865f2;
+  flex-shrink:0;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:700;
-  flex-shrink:0;
 }
 
 .avatar img{
@@ -96,165 +79,119 @@ button{
 .text{
   color:#cdd0d5;
 }
+
+.tag{
+  font-size:11px;
+  color:#949ba4;
+}
 </style>
 </head>
 
 <body>
 
-<nav>Discord Message Builder</nav>
+<nav>Discord Chat Generator</nav>
 
 <div class="container">
 
-<div class="layout">
+<button onclick="generate()">Generate Chat (141 messages)</button>
 
-<!-- LEFT CONTROLS -->
-<div>
-
-<input id="username" placeholder="Username"/>
-<input id="message" placeholder="Message"/>
-
-<input type="file" id="pfp"/>
-
-<button onclick="addMessage()">Add Message</button>
-<button onclick="downloadHTML()">Download Single HTML</button>
-
-</div>
-
-<!-- RIGHT PREVIEW -->
 <div class="feed" id="feed"></div>
 
 </div>
 
-</div>
+<!-- DATA FILES -->
+<script src="./usernames.js"></script>
+<script src="./sends.js"></script>
+<script src="./respondents.js"></script>
 
 <script>
-let messages = [];
-let currentPFP = null;
 
-/* PFP UPLOAD */
-document.getElementById("pfp").addEventListener("change", e=>{
-  const file = e.target.files[0];
-  if(!file) return;
+/* =========================
+   PFP MANIFEST SYSTEM
+========================= */
 
-  const reader = new FileReader();
-  reader.onload = () => currentPFP = reader.result;
-  reader.readAsDataURL(file);
-});
+const baseURL =
+"https://cdn.jsdelivr.net/gh/LZRcreeperReal/pfpsforvouchvisualizer@main";
 
-/* ADD MESSAGE */
-function addMessage(){
+const cache = {};
 
-  const user = document.getElementById("username").value || "user";
-  const text = document.getElementById("message").value || "message";
-
-  messages.push({
-    user,
-    text,
-    pfp: currentPFP
-  });
-
-  render();
+async function load(folder){
+  if(cache[folder]) return cache[folder];
+  const res = await fetch(`${baseURL}/${folder}/manifest.json`);
+  const data = await res.json();
+  cache[folder] = data;
+  return data;
 }
 
-/* RENDER PREVIEW */
-function render(){
+async function randomPFP(){
+  const folders = ["Eboy","Egirl","Meme","Roblox"];
+  const folder = folders[Math.floor(Math.random()*folders.length)];
+
+  const files = await load(folder);
+  const file = files[Math.floor(Math.random()*files.length)];
+
+  return `${baseURL}/${folder}/${file}`;
+}
+
+/* ========================= */
+
+function pick(arr){
+  return arr[Math.floor(Math.random()*arr.length)];
+}
+
+function time(){
+  return "Today at " +
+    (Math.floor(Math.random()*12)+1) + ":" +
+    String(Math.floor(Math.random()*60)).padStart(2,'0');
+}
+
+/* =========================
+   GENERATE CHAT
+========================= */
+
+async function generate(){
 
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
-  messages.forEach(m=>{
+  const users = window.usernames || [];
+  const sends = window.sends || [];
+  const responses = window.responses || [];
+
+  for(let i=0;i<141;i++){
+
+    const isSender = i % 2 === 0;
+
+    let user, text, pfp, tag;
+
+    if(isSender){
+      user = "YOU";
+      text = pick(sends);
+      pfp = null;
+      tag = "sender";
+    } else {
+      user = pick(users);
+      text = pick(responses);
+      pfp = await randomPFP();
+      tag = "respondent";
+    }
+
     const div = document.createElement("div");
     div.className = "msg";
 
     div.innerHTML = `
       <div class="avatar">
-        ${m.pfp ? `<img src="${m.pfp}">` : m.user.slice(0,2).toUpperCase()}
+        ${pfp ? `<img src="${pfp}">` : user.slice(0,2).toUpperCase()}
       </div>
+
       <div>
-        <div class="name">${m.user}</div>
-        <div class="text">${m.text}</div>
+        <div class="name">${user} <span class="tag">${tag}</span></div>
+        <div class="text">${text}</div>
       </div>
     `;
 
     feed.appendChild(div);
-  });
-
-}
-
-/* EXPORT SINGLE FILE HTML */
-function downloadHTML(){
-
-const html = `
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Discord Export</title>
-<style>
-body{
-  margin:0;
-  background:#313338;
-  font-family:Arial;
-  color:#dbdee1;
-  padding:20px;
-}
-
-.msg{
-  display:flex;
-  gap:12px;
-  margin-bottom:12px;
-}
-
-.avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  overflow:hidden;
-  background:#5865f2;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  flex-shrink:0;
-}
-
-.avatar img{
-  width:100%;
-  height:100%;
-}
-
-.name{
-  font-weight:bold;
-}
-
-.text{
-  color:#cdd0d5;
-}
-</style>
-</head>
-<body>
-
-${messages.map(m=>`
-  <div class="msg">
-    <div class="avatar">
-      ${m.pfp ? `<img src="${m.pfp}">` : m.user.slice(0,2).toUpperCase()}
-    </div>
-    <div>
-      <div class="name">${m.user}</div>
-      <div class="text">${m.text}</div>
-    </div>
-  </div>
-`).join("")}
-
-</body>
-</html>
-`;
-
-  const blob = new Blob([html], {type:"text/html"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "discord-export.html";
-  a.click();
+  }
 }
 
 </script>
