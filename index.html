@@ -69,6 +69,7 @@ button{
 <div class="container">
 
 <input id="username" placeholder="Your username"/>
+
 <button onclick="generate()">Generate</button>
 <button onclick="exportProject()">Download Deployable Site</button>
 
@@ -76,11 +77,26 @@ button{
 
 </div>
 
-<script src="./usernames.js"></script>
-<script src="./respondents.js"></script>
-<script src="./sends.js"></script>
-
 <script>
+/* =========================
+   SAFE INTERNAL DATA
+========================= */
+
+const usernames = [
+  "saturn","clouded","vyn","mei","angelic","faded","nova","rynn",
+  "ghost","frosted","voided","sleepy","lotus","haze","orbit",
+  "catlawyer","breaddealer","microwave","goober","toaster"
+];
+
+const responses = [
+  "yeah ur good","its fine","all good","that worked","yea i got it",
+  "looks good","no issues","seems fine","all set","thx again",
+  "nice","clean","perfect honestly","yeah works","it came through",
+  "yep got it","all sorted","we good","its done","no problems"
+];
+
+/* ========================= */
+
 let generatedVouches = [];
 
 function pick(arr){
@@ -88,7 +104,7 @@ function pick(arr){
 }
 
 /* -------------------------
-   GENERATE PREVIEW
+   GENERATE
 --------------------------*/
 function generate(){
   const feed = document.getElementById("feed");
@@ -96,9 +112,10 @@ function generate(){
   generatedVouches = [];
 
   for(let i=0;i<15;i++){
+
     const v = {
-      user: pick(window.usernames || ["user"]),
-      message: pick(window.responses || ["ok"])
+      user: pick(usernames),
+      message: pick(responses)
     };
 
     generatedVouches.push(v);
@@ -111,7 +128,7 @@ function generate(){
 }
 
 /* -------------------------
-   EXPORT PROJECT
+   EXPORT (Vercel-ready ZIP)
 --------------------------*/
 function exportProject(){
 
@@ -122,7 +139,7 @@ function exportProject(){
 
   const zip = new JSZip();
 
-  const vercel = {
+  const vercelConfig = {
     version: 2,
     builds: [
       { src: "index.html", use: "@vercel/static" }
@@ -137,6 +154,7 @@ function exportProject(){
 <title>Voucher Visual</title>
 <style>
 body{
+  margin:0;
   background:#0f0f13;
   color:#e8e0f5;
   font-family:Arial;
@@ -148,7 +166,7 @@ body{
 }
 .msg{
   padding:10px;
-  border-bottom:1px solid #333;
+  border-bottom:1px solid #2e2e2e;
 }
 </style>
 </head>
@@ -170,15 +188,15 @@ ${generatedVouches.map(v => `
 `;
 
   zip.file("index.html", html);
-  zip.file("vercel.json", JSON.stringify(vercel, null, 2));
+  zip.file("vercel.json", JSON.stringify(vercelConfig, null, 2));
 
   zip.folder("Eboy");
   zip.folder("Egirl");
   zip.folder("Meme");
   zip.folder("Roblox");
 
-  zip.generateAsync({type:"blob"}).then(blob=>{
-    saveAs(blob,"voucher-visual.zip");
+  zip.generateAsync({ type: "blob" }).then(blob => {
+    saveAs(blob, "voucher-visual.zip");
   });
 }
 </script>
