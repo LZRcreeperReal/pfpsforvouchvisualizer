@@ -61,10 +61,6 @@ const responses = new Set();
 /* generate 150 responses */
 while(responses.size < 150){
 
-  const user = window.usernames
-    ? pick(window.usernames)
-    : "user";
-
   let msg;
 
   const type = Math.random();
