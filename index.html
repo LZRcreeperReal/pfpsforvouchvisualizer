@@ -160,10 +160,15 @@ async function generate(){
   const userPfp = pfpFile ? URL.createObjectURL(pfpFile) : null;
 
   const users = window.usernames || [];
-  const sends = window.sends || [];
-  const responseData = window.responses;
 
-  for(let i=0;i<141;i++){
+  // ⚠️ IMPORTANT FIX HERE:
+  const responses = window.buildResponses
+    ? window.buildResponses(users)
+    : [];
+
+  const sends = window.sends || [];
+
+  for(let i = 0; i < 141; i++){
 
     const isYou = i % 2 === 0;
 
@@ -174,17 +179,8 @@ async function generate(){
       text = pick(sends);
       pfp = userPfp;
     } else {
-      user = pick(users);
-      const templates = responseData.templates;
-      const positives = responseData.positives;
-
-      const userForMsg = pick(users);
-
-      let raw = Math.random() < 0.6
-        ? pick(templates).replaceAll("{user}", userForMsg)
-        : `${pick(positives)} ${userForMsg}`;
-
-      text = raw;;
+      user = pick(users) || "user";
+      text = pick(responses) || "vouch";
       pfp = await randomPFP();
     }
 
