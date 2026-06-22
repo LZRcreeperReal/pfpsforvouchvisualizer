@@ -3,34 +3,42 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Discord Chat</title>
+<title>Vouch Visualiser</title>
 
 <style>
 body{
   margin:0;
-  background:#313338;
+  background:#1a1a1e;
   font-family: Arial, sans-serif;
   color:#dbdee1;
 }
 
-/* CHAT AREA */
+/* HEADER */
+.header{
+  padding:14px 20px;
+  font-weight:700;
+  font-size:16px;
+  border-bottom:1px solid #2b2d31;
+  background:#1a1a1e;
+}
+
+/* CHAT */
 .feed{
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
+  max-width:800px;
+  margin:0 auto;
+  padding:20px;
   display:flex;
   flex-direction:column;
   gap:14px;
 }
 
-/* MESSAGE ROW */
+/* MESSAGE */
 .msg{
   display:flex;
   gap:12px;
   align-items:flex-start;
 }
 
-/* AVATAR */
 .avatar{
   width:40px;
   height:40px;
@@ -51,72 +59,45 @@ body{
   object-fit:cover;
 }
 
-/* NAME */
+.block{
+  display:flex;
+  flex-direction:column;
+}
+
 .name{
   font-weight:600;
   font-size:14px;
 }
 
-/* TEXT */
 .text{
-  color:#dbdee1;
   font-size:14px;
-  margin-top:2px;
+  color:#dbdee1;
 }
 
-/* MESSAGE BLOCK */
-.block{
-  display:flex;
-  flex-direction:column;
+/* DIVIDER */
+.divider{
+  height:1px;
+  background:#2b2d31;
+  margin:10px 0;
 }
 </style>
 </head>
 
 <body>
 
+<div class="header">Vouch Visualiser</div>
+
 <div class="feed" id="feed"></div>
+
+<!-- DATA FILES -->
+<script src="./usernames.js"></script>
+<script src="./sends.js"></script>
+<script src="./respondents.js"></script>
 
 <script>
 
 /* =========================
-   CONFIG
-========================= */
-
-const SENDER = "Huna7";
-const SENDER_PFP = "./huna7pfp.png";
-
-/* =========================
-   DATA (same idea as before)
-========================= */
-
-const users = [
-  "nova","kai","ghost","luna","zen","milo","echo","ray","nyx","atlas",
-  "bliss","ember","frost","rune","drift","halo","lumen","storm","zero"
-];
-
-const messages = [
-  "vouch legit",
-  "smooth deal",
-  "fast and easy",
-  "no issues",
-  "100% legit",
-  "safe deal",
-  "went smooth",
-  "trustworthy",
-  "all good"
-];
-
-const sends = [
-  "yo can u vouch",
-  "hey rq can u confirm",
-  "yo bro can u leave vouch",
-  "yo quick thing",
-  "hey can u vouch for me",
-  "yo u there"
-];
-
-/* =========================
-   UTILS
+   FIXED PICKER
 ========================= */
 
 function pick(arr){
@@ -124,49 +105,73 @@ function pick(arr){
 }
 
 /* =========================
-   GENERATE CHAT (PAIR STYLE)
+   SAFE DATA ACCESS
+========================= */
+
+const users = window.usernames || [];
+const sends = window.sends || [];
+const responses = window.responses || [];
+
+/* fallback safety (prevents undefined bug) */
+function safePick(arr, fallback){
+  if(!Array.isArray(arr) || arr.length === 0) return fallback;
+  return pick(arr);
+}
+
+/* =========================
+   GENERATE CHAT IN PAIRS
 ========================= */
 
 const feed = document.getElementById("feed");
 
-for(let i = 0; i < 60; i++){
+let blocks = 20; // number of grouped sections
 
-  // ---- MESSAGE 1 (Huna7) ----
-  const msg1 = document.createElement("div");
-  msg1.className = "msg";
+for(let b = 0; b < blocks; b++){
 
-  msg1.innerHTML = `
-    <div class="avatar">
-      <img src="${SENDER_PFP}">
-    </div>
+  for(let i = 0; i < 2; i++){
 
-    <div class="block">
-      <div class="name">${SENDER}</div>
-      <div class="text">${pick(sends)}</div>
-    </div>
-  `;
+    /* HUNA7 MESSAGE */
+    const msg1 = document.createElement("div");
+    msg1.className = "msg";
 
-  feed.appendChild(msg1);
+    msg1.innerHTML = `
+      <div class="avatar">
+        HU
+      </div>
 
-  // ---- MESSAGE 2 (random user reply) ----
-  const user = pick(users);
-  const reply = pick(messages);
+      <div class="block">
+        <div class="name">Huna7</div>
+        <div class="text">${safePick(sends, "yo can u vouch")}</div>
+      </div>
+    `;
 
-  const msg2 = document.createElement("div");
-  msg2.className = "msg";
+    feed.appendChild(msg1);
 
-  msg2.innerHTML = `
-    <div class="avatar">
-      ${user.slice(0,2).toUpperCase()}
-    </div>
+    /* RANDOM USER RESPONSE */
+    const user = safePick(users, "user");
+    const reply = safePick(responses, "vouch legit");
 
-    <div class="block">
-      <div class="name">${user}</div>
-      <div class="text">${reply}</div>
-    </div>
-  `;
+    const msg2 = document.createElement("div");
+    msg2.className = "msg";
 
-  feed.appendChild(msg2);
+    msg2.innerHTML = `
+      <div class="avatar">
+        ${user.slice(0,2).toUpperCase()}
+      </div>
+
+      <div class="block">
+        <div class="name">${user}</div>
+        <div class="text">${reply}</div>
+      </div>
+    `;
+
+    feed.appendChild(msg2);
+  }
+
+  /* DIVIDER BETWEEN GROUPS */
+  const div = document.createElement("div");
+  div.className = "divider";
+  feed.appendChild(div);
 }
 
 </script>
