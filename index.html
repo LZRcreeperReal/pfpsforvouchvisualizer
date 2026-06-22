@@ -101,6 +101,7 @@ button{
 <input id="pfpInput" type="file" accept="image/*"/>
 
 <button onclick="generate()">Generate Chat (141 messages)</button>
+<button onclick="downloadVouchSite()">Download Vouch Visuals</button>
 
 <div class="feed" id="feed"></div>
 
@@ -114,7 +115,13 @@ button{
 <script>
 
 /* =========================
-   RANDOM PFP SYSTEM
+   GLOBAL STORAGE
+========================= */
+
+window.lastVouches = [];
+
+/* =========================
+   PFP SYSTEM
 ========================= */
 
 const baseURL =
@@ -140,8 +147,6 @@ async function randomPFP(){
   return `${baseURL}/${folder}/${file}`;
 }
 
-/* ========================= */
-
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
@@ -155,6 +160,8 @@ async function generate(){
   const feed = document.getElementById("feed");
   feed.innerHTML = "";
 
+  window.lastVouches = [];
+
   const username = document.getElementById("usernameInput").value || "You";
   const pfpFile = document.getElementById("pfpInput").files[0];
   const userPfp = pfpFile ? URL.createObjectURL(pfpFile) : null;
@@ -162,14 +169,12 @@ async function generate(){
   const users = window.usernames || [];
   const sends = window.sends || [];
 
-  // build responses safely
   const targetUser = username;
 
   const responses = window.buildResponses
     ? window.buildResponses(users, targetUser)
     : [];
 
-  // preload avatars (fast rendering)
   const pfps = await Promise.all(
     Array.from({ length: 141 }, () => randomPFP())
   );
@@ -185,15 +190,14 @@ async function generate(){
       text = pick(sends) || "hi";
       pfp = userPfp;
     } else {
-      user = Array.isArray(users) && users.length
-        ? pick(users)
-        : "user";
-
-      text = Array.isArray(responses) && responses.length
-        ? pick(responses)
-        : "vouch";
-
+      user = pick(users) || "user";
+      text = pick(responses) || "vouch";
       pfp = pfps[i];
+
+      window.lastVouches.push({
+        user,
+        text
+      });
     }
 
     const div = document.createElement("div");
@@ -212,6 +216,122 @@ async function generate(){
 
     feed.appendChild(div);
   }
+}
+
+/* =========================
+   EXPORT VOUCH SITE
+========================= */
+
+function downloadVouchSite(){
+
+  const vouches = window.lastVouches || [];
+
+  function chunk(arr, size){
+    const res = [];
+    for(let i = 0; i < arr.length; i += size){
+      res.push(arr.slice(i, i + size));
+    }
+    return res;
+  }
+
+  const groups = chunk(vouches, 20);
+
+  const sections = groups.map((group, i) => {
+
+    const cards = group.map(v => `
+      <div class="vouch">
+        <div class="vouch-header">
+          <div class="vouch-avatar">${v.user.slice(0,2).toUpperCase()}</div>
+          <div>
+            <div class="vouch-name">${v.user}</div>
+            <div class="vouch-date">recent</div>
+          </div>
+        </div>
+        <div class="vouch-text">${v.text}</div>
+      </div>
+    `).join("");
+
+    return `
+      <div class="section">
+        <div class="section-title">Vouch Group ${i+1}</div>
+        <div class="vouches-grid">${cards}</div>
+      </div>
+    `;
+  }).join("");
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Vouch Visuals</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Inter;
+  background:#0b0b10;
+  color:#e8e0f5;
+}
+
+.section{padding:30px;}
+
+.section-title{
+  color:#a47de0;
+  font-size:12px;
+  letter-spacing:2px;
+  margin-bottom:12px;
+}
+
+.vouches-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+  gap:12px;
+}
+
+.vouch{
+  background:linear-gradient(145deg,#1a1727,#141220);
+  border:1px solid #2e2b4a;
+  border-radius:12px;
+  padding:16px;
+}
+
+.vouch-header{
+  display:flex;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.vouch-avatar{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:#7c5cbf;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:white;
+}
+
+.vouch-name{font-weight:600;}
+.vouch-text{color:#8b82a7;}
+</style>
+
+</head>
+<body>
+${sections}
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "vouch-visuals.html";
+  a.click();
+
+  URL.revokeObjectURL(url);
 }
 
 </script>
