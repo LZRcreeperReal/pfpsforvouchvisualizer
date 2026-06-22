@@ -17,7 +17,6 @@ body{
 .header{
   padding:14px 20px;
   font-weight:700;
-  font-size:16px;
   border-bottom:1px solid #2b2d31;
   background:#1a1a1e;
 }
@@ -32,7 +31,6 @@ body{
   gap:14px;
 }
 
-/* MESSAGE */
 .msg{
   display:flex;
   gap:12px;
@@ -43,14 +41,14 @@ body{
   width:40px;
   height:40px;
   border-radius:50%;
-  overflow:hidden;
   background:#5865f2;
-  flex-shrink:0;
   display:flex;
   align-items:center;
   justify-content:center;
   font-weight:700;
   color:white;
+  flex-shrink:0;
+  overflow:hidden;
 }
 
 .avatar img{
@@ -74,11 +72,10 @@ body{
   color:#dbdee1;
 }
 
-/* DIVIDER */
 .divider{
   height:1px;
   background:#2b2d31;
-  margin:10px 0;
+  margin:6px 0;
 }
 </style>
 </head>
@@ -97,68 +94,56 @@ body{
 <script>
 
 /* =========================
-   FIXED PICKER
+   SAFE ACCESS (NO CRASHES)
 ========================= */
+
+const users = Array.isArray(window.usernames) ? window.usernames : [];
+const sends = Array.isArray(window.sends) ? window.sends : [];
+const responses = Array.isArray(window.responses) ? window.responses : [];
 
 function pick(arr){
-  return arr[Math.floor(Math.random()*arr.length)];
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/* =========================
-   SAFE DATA ACCESS
-========================= */
-
-const users = window.usernames || [];
-const sends = window.sends || [];
-const responses = window.responses || [];
-
-/* fallback safety (prevents undefined bug) */
-function safePick(arr, fallback){
-  if(!Array.isArray(arr) || arr.length === 0) return fallback;
+/* fallback safe pick */
+function safe(arr, fallback){
+  if (!Array.isArray(arr) || arr.length === 0) return fallback;
   return pick(arr);
 }
 
 /* =========================
-   GENERATE CHAT IN PAIRS
+   BUILD CHAT
 ========================= */
 
 const feed = document.getElementById("feed");
 
-let blocks = 20; // number of grouped sections
+for(let i = 0; i < 25; i++){
 
-for(let b = 0; b < blocks; b++){
-
-  for(let i = 0; i < 2; i++){
+  for(let j = 0; j < 2; j++){
 
     /* HUNA7 MESSAGE */
     const msg1 = document.createElement("div");
     msg1.className = "msg";
 
     msg1.innerHTML = `
-      <div class="avatar">
-        HU
-      </div>
-
+      <div class="avatar">HU</div>
       <div class="block">
         <div class="name">Huna7</div>
-        <div class="text">${safePick(sends, "yo can u vouch")}</div>
+        <div class="text">${safe(sends, "yo can u vouch")}</div>
       </div>
     `;
 
     feed.appendChild(msg1);
 
-    /* RANDOM USER RESPONSE */
-    const user = safePick(users, "user");
-    const reply = safePick(responses, "vouch legit");
+    /* RANDOM USER REPLY */
+    const user = safe(users, "user");
+    const reply = safe(responses, "vouch legit");
 
     const msg2 = document.createElement("div");
     msg2.className = "msg";
 
     msg2.innerHTML = `
-      <div class="avatar">
-        ${user.slice(0,2).toUpperCase()}
-      </div>
-
+      <div class="avatar">${user.slice(0,2).toUpperCase()}</div>
       <div class="block">
         <div class="name">${user}</div>
         <div class="text">${reply}</div>
@@ -168,7 +153,7 @@ for(let b = 0; b < blocks; b++){
     feed.appendChild(msg2);
   }
 
-  /* DIVIDER BETWEEN GROUPS */
+  /* DIVIDER BETWEEN PAIRS */
   const div = document.createElement("div");
   div.className = "divider";
   feed.appendChild(div);
