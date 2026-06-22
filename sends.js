@@ -58,10 +58,8 @@ const fillers = [
   "",
   "",
   "",
-  "...",
   " lol",
   " fr",
-  " ngl",
   " btw"
 ];
 
