@@ -3,140 +3,91 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Vouch Visuals</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<title>Discord Chat</title>
 
 <style>
-:root {
-  --bg: #190e00;
-  --panel: #1e1f22;
-  --text: #dbdee1;
-  --muted: #aab0b6;
-  --accent: #7c5cbf;
+body{
+  margin:0;
+  background:#313338;
+  font-family: Arial, sans-serif;
+  color:#dbdee1;
 }
 
-body {
-  margin: 0;
-  font-family: Inter;
-  background: var(--bg);
-  color: var(--text);
-}
-
-/* ── HEADER (Vouch Visual style) ── */
-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  padding: 14px 24px;
-  background: rgba(30,31,34,0.85);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid #2a2b30;
-  font-family: Sora;
-  font-weight: 700;
-}
-
-/* ── HERO ── */
-.hero {
-  text-align: center;
-  padding: 50px 20px 30px;
-}
-
-.hero h1 {
-  font-family: Sora;
-  font-size: 2.6rem;
-}
-
-.hero span {
-  color: #a47de0;
-}
-
-.hero p {
-  color: var(--muted);
-  font-size: 0.9rem;
-}
-
-/* ── CHAT AREA ── */
-.feed {
-  max-width: 900px;
-  margin: auto;
+/* CHAT AREA */
+.feed{
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
-/* ── MESSAGE STYLE (Discord-like) ── */
-.msg {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  background: #1a1727;
-  border: 1px solid #2e2b4a;
-  padding: 12px;
-  border-radius: 10px;
+/* MESSAGE ROW */
+.msg{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
 }
 
-.avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #7c5cbf;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: white;
+/* AVATAR */
+.avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#5865f2;
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:white;
 }
 
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.avatar img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 
-.name {
-  font-weight: 600;
+/* NAME */
+.name{
+  font-weight:600;
+  font-size:14px;
 }
 
-.text {
-  color: var(--muted);
-  font-size: 0.9rem;
+/* TEXT */
+.text{
+  color:#dbdee1;
+  font-size:14px;
+  margin-top:2px;
 }
 
-/* ── VOUCH SECTION SPLIT ── */
-.section-title {
-  margin: 20px 0 6px;
-  font-size: 0.7rem;
-  letter-spacing: 2px;
-  color: #a47de0;
-  text-transform: uppercase;
+/* MESSAGE BLOCK */
+.block{
+  display:flex;
+  flex-direction:column;
 }
 </style>
 </head>
 
 <body>
 
-<nav>Vouch Visuals</nav>
-
-<div class="hero">
-  <h1>Vouch <span>Visuals</span></h1>
-  <p>Automatically generated vouch showcase</p>
-</div>
-
 <div class="feed" id="feed"></div>
 
 <script>
-/* ───────── CONFIG ───────── */
 
-const SENDER_NAME = "Huna7";
+/* =========================
+   CONFIG
+========================= */
+
+const SENDER = "Huna7";
 const SENDER_PFP = "./huna7pfp.png";
 
-/* ───────── DATA ───────── */
+/* =========================
+   DATA (same idea as before)
+========================= */
 
 const users = [
   "nova","kai","ghost","luna","zen","milo","echo","ray","nyx","atlas",
@@ -155,54 +106,69 @@ const messages = [
   "all good"
 ];
 
-/* ───────── UTILS ───────── */
+const sends = [
+  "yo can u vouch",
+  "hey rq can u confirm",
+  "yo bro can u leave vouch",
+  "yo quick thing",
+  "hey can u vouch for me",
+  "yo u there"
+];
+
+/* =========================
+   UTILS
+========================= */
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* ───────── GENERATE ───────── */
+/* =========================
+   GENERATE CHAT (PAIR STYLE)
+========================= */
 
 const feed = document.getElementById("feed");
 
-const vouches = [];
+for(let i = 0; i < 60; i++){
 
-for(let i = 0; i < 120; i++){
+  // ---- MESSAGE 1 (Huna7) ----
+  const msg1 = document.createElement("div");
+  msg1.className = "msg";
 
-  const isSender = i % 2 === 0;
-
-  let user, text, avatar;
-
-  if(isSender){
-    user = SENDER_NAME;
-    text = "can vouch";
-    avatar = SENDER_PFP;
-  } else {
-    user = pick(users);
-    text = pick(messages);
-    avatar = `https://api.dicebear.com/7.x/thumbs/svg?seed=${user}`;
-
-    vouches.push({ user, text });
-  }
-
-  const div = document.createElement("div");
-  div.className = "msg";
-
-  div.innerHTML = `
+  msg1.innerHTML = `
     <div class="avatar">
-      ${avatar.includes("http") || avatar.includes("png")
-        ? `<img src="${avatar}">`
-        : user.slice(0,2).toUpperCase()}
+      <img src="${SENDER_PFP}">
     </div>
 
-    <div>
-      <div class="name">${user}</div>
-      <div class="text">${text}</div>
+    <div class="block">
+      <div class="name">${SENDER}</div>
+      <div class="text">${pick(sends)}</div>
     </div>
   `;
 
-  feed.appendChild(div);
+  feed.appendChild(msg1);
+
+  // ---- MESSAGE 2 (random user reply) ----
+  const user = pick(users);
+  const reply = pick(messages);
+
+  const msg2 = document.createElement("div");
+  msg2.className = "msg";
+
+  msg2.innerHTML = `
+    <div class="avatar">
+      ${user.slice(0,2).toUpperCase()}
+    </div>
+
+    <div class="block">
+      <div class="name">${user}</div>
+      <div class="text">${reply}</div>
+    </div>
+  `;
+
+  feed.appendChild(msg2);
 }
+
 </script>
 
 </body>
