@@ -163,8 +163,10 @@ async function generate(){
   const sends = window.sends || [];
 
   // build responses safely
+  const targetUser = username;
+
   const responses = window.buildResponses
-    ? window.buildResponses(users)
+    ? window.buildResponses(users, targetUser)
     : [];
 
   // preload avatars (fast rendering)
