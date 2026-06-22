@@ -41,35 +41,37 @@ const positives = [
    MAIN GENERATOR
 ------------------------- */
 
-function buildResponses(users){
+function buildResponses(users, targetUser = null){
 
   const arr = [];
 
+  const hasUsers = Array.isArray(users) && users.length > 0;
+
+  // fallback if no target provided
+  const finalTarget = targetUser || "user";
+
   for(let i = 0; i < 150; i++){
-
-    const hasUsers =
-      Array.isArray(users) &&
-      users.length > 0;
-
-    const user = hasUsers
-      ? pick(users)
-      : "user";
 
     const type = Math.random();
 
     let msg;
 
-    if(type < 0.45){
-      msg = pick(templates).replaceAll("{user}", user);
-    }
-    else if(type < 0.8){
-      msg = `${pick(positives)} ${user}`;
-    }
-    else{
-      msg = `${user} - ${pick(positives)}`;
+    // 1) Template style (most common)
+    if(type < 0.5){
+      msg = pick(templates).replaceAll("{user}", finalTarget);
     }
 
-    // small realism noise
+    // 2) Positive + name
+    else if(type < 0.8){
+      msg = `${pick(positives)} ${finalTarget}`;
+    }
+
+    // 3) Slight variation style
+    else{
+      msg = `${finalTarget} - ${pick(positives)}`;
+    }
+
+    // realism noise
     if(Math.random() < 0.15) msg += " fr";
     if(Math.random() < 0.10) msg += "...";
 
