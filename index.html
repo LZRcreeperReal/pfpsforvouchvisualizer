@@ -3,337 +3,206 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Discord Chat Generator</title>
+<title>Vouch Visuals</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
 
 <style>
-body{
-  margin:0;
-  background:#190e00;
-  font-family:Inter;
-  color:#dbdee1;
+:root {
+  --bg: #190e00;
+  --panel: #1e1f22;
+  --text: #dbdee1;
+  --muted: #aab0b6;
+  --accent: #7c5cbf;
 }
 
-nav{
-  background:#1e1f22;
-  padding:14px 20px;
-  font-weight:600;
+body {
+  margin: 0;
+  font-family: Inter;
+  background: var(--bg);
+  color: var(--text);
 }
 
-.container{
-  max-width:900px;
-  margin:auto;
-  padding:20px;
+/* ── HEADER (Vouch Visual style) ── */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: rgba(30,31,34,0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid #2a2b30;
+  font-family: Sora;
+  font-weight: 700;
 }
 
-input{
-  width:100%;
-  padding:10px;
-  margin:6px 0;
-  border-radius:6px;
-  border:none;
-  outline:none;
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 50px 20px 30px;
 }
 
-button{
-  width:100%;
-  padding:12px;
-  margin:10px 0;
-  border:none;
-  border-radius:6px;
-  background:#5865f2;
-  color:white;
-  font-weight:600;
-  cursor:pointer;
+.hero h1 {
+  font-family: Sora;
+  font-size: 2.6rem;
 }
 
-.feed{
-  margin-top:20px;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+.hero span {
+  color: #a47de0;
 }
 
-.msg{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
+.hero p {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
-.avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  overflow:hidden;
-  background:#5865f2;
-  flex-shrink:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:white;
+/* ── CHAT AREA ── */
+.feed {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.avatar img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+/* ── MESSAGE STYLE (Discord-like) ── */
+.msg {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #1a1727;
+  border: 1px solid #2e2b4a;
+  padding: 12px;
+  border-radius: 10px;
 }
 
-.name{
-  font-weight:600;
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #7c5cbf;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
 }
 
-.text{
-  color:#cdd0d5;
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.name {
+  font-weight: 600;
+}
+
+.text {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* ── VOUCH SECTION SPLIT ── */
+.section-title {
+  margin: 20px 0 6px;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: #a47de0;
+  text-transform: uppercase;
 }
 </style>
 </head>
 
 <body>
 
-<nav>Discord Chat Generator</nav>
+<nav>Vouch Visuals</nav>
 
-<div class="container">
-
-<input id="usernameInput" placeholder="Your username"/>
-<input id="pfpInput" type="file" accept="image/*"/>
-
-<button onclick="generate()">Generate Chat (141 messages)</button>
-<button onclick="downloadVouchSite()">Download Vouch Visuals</button>
+<div class="hero">
+  <h1>Vouch <span>Visuals</span></h1>
+  <p>Automatically generated vouch showcase</p>
+</div>
 
 <div class="feed" id="feed"></div>
 
-</div>
-
-<!-- DATA FILES -->
-<script src="./usernames.js"></script>
-<script src="./sends.js"></script>
-<script src="./respondents.js"></script>
-
 <script>
+/* ───────── CONFIG ───────── */
 
-/* =========================
-   GLOBAL STORAGE
-========================= */
+const SENDER_NAME = "Huna7";
+const SENDER_PFP = "./huna7pfp.png";
 
-window.lastVouches = [];
+/* ───────── DATA ───────── */
 
-/* =========================
-   PFP SYSTEM
-========================= */
+const users = [
+  "nova","kai","ghost","luna","zen","milo","echo","ray","nyx","atlas",
+  "bliss","ember","frost","rune","drift","halo","lumen","storm","zero"
+];
 
-const baseURL =
-"https://cdn.jsdelivr.net/gh/LZRcreeperReal/pfpsforvouchvisualizer@main";
+const messages = [
+  "vouch legit",
+  "smooth deal",
+  "fast and easy",
+  "no issues",
+  "100% legit",
+  "safe deal",
+  "went smooth",
+  "trustworthy",
+  "all good"
+];
 
-const cache = {};
-
-async function load(folder){
-  if(cache[folder]) return cache[folder];
-  const res = await fetch(`${baseURL}/${folder}/manifest.json`);
-  const data = await res.json();
-  cache[folder] = data;
-  return data;
-}
-
-async function randomPFP(){
-  const folders = ["Eboy","Egirl","Meme","Roblox"];
-  const folder = folders[Math.floor(Math.random()*folders.length)];
-
-  const files = await load(folder);
-  const file = files[Math.floor(Math.random()*files.length)];
-
-  return `${baseURL}/${folder}/${file}`;
-}
+/* ───────── UTILS ───────── */
 
 function pick(arr){
   return arr[Math.floor(Math.random()*arr.length)];
 }
 
-/* =========================
-   GENERATE CHAT
-========================= */
+/* ───────── GENERATE ───────── */
 
-async function generate(){
+const feed = document.getElementById("feed");
 
-  const feed = document.getElementById("feed");
-  feed.innerHTML = "";
+const vouches = [];
 
-  window.lastVouches = [];
+for(let i = 0; i < 120; i++){
 
-  const username = document.getElementById("usernameInput").value || "You";
-  const pfpFile = document.getElementById("pfpInput").files[0];
-  const userPfp = pfpFile ? URL.createObjectURL(pfpFile) : null;
+  const isSender = i % 2 === 0;
 
-  const users = window.usernames || [];
-  const sends = window.sends || [];
+  let user, text, avatar;
 
-  const targetUser = username;
+  if(isSender){
+    user = SENDER_NAME;
+    text = "can vouch";
+    avatar = SENDER_PFP;
+  } else {
+    user = pick(users);
+    text = pick(messages);
+    avatar = `https://api.dicebear.com/7.x/thumbs/svg?seed=${user}`;
 
-  const responses = window.buildResponses
-    ? window.buildResponses(users, targetUser)
-    : [];
-
-  const pfps = await Promise.all(
-    Array.from({ length: 141 }, () => randomPFP())
-  );
-
-  for(let i = 0; i < 141; i++){
-
-    const isYou = i % 2 === 0;
-
-    let user, text, pfp;
-
-    if(isYou){
-      user = username;
-      text = pick(sends) || "hi";
-      pfp = userPfp;
-    } else {
-      user = pick(users) || "user";
-      text = pick(responses) || "vouch";
-      pfp = pfps[i];
-
-      window.lastVouches.push({
-        user,
-        text
-      });
-    }
-
-    const div = document.createElement("div");
-    div.className = "msg";
-
-    div.innerHTML = `
-      <div class="avatar">
-        ${pfp ? `<img src="${pfp}">` : user.slice(0,2).toUpperCase()}
-      </div>
-
-      <div>
-        <div class="name">${user}</div>
-        <div class="text">${text}</div>
-      </div>
-    `;
-
-    feed.appendChild(div);
-  }
-}
-
-/* =========================
-   EXPORT VOUCH SITE
-========================= */
-
-function downloadVouchSite(){
-
-  const vouches = window.lastVouches || [];
-
-  function chunk(arr, size){
-    const res = [];
-    for(let i = 0; i < arr.length; i += size){
-      res.push(arr.slice(i, i + size));
-    }
-    return res;
+    vouches.push({ user, text });
   }
 
-  const groups = chunk(vouches, 20);
+  const div = document.createElement("div");
+  div.className = "msg";
 
-  const sections = groups.map((group, i) => {
+  div.innerHTML = `
+    <div class="avatar">
+      ${avatar.includes("http") || avatar.includes("png")
+        ? `<img src="${avatar}">`
+        : user.slice(0,2).toUpperCase()}
+    </div>
 
-    const cards = group.map(v => `
-      <div class="vouch">
-        <div class="vouch-header">
-          <div class="vouch-avatar">${v.user.slice(0,2).toUpperCase()}</div>
-          <div>
-            <div class="vouch-name">${v.user}</div>
-            <div class="vouch-date">recent</div>
-          </div>
-        </div>
-        <div class="vouch-text">${v.text}</div>
-      </div>
-    `).join("");
+    <div>
+      <div class="name">${user}</div>
+      <div class="text">${text}</div>
+    </div>
+  `;
 
-    return `
-      <div class="section">
-        <div class="section-title">Vouch Group ${i+1}</div>
-        <div class="vouches-grid">${cards}</div>
-      </div>
-    `;
-  }).join("");
-
-  const html = `<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Vouch Visuals</title>
-
-<style>
-body{
-  margin:0;
-  font-family:Inter;
-  background:#0b0b10;
-  color:#e8e0f5;
+  feed.appendChild(div);
 }
-
-.section{padding:30px;}
-
-.section-title{
-  color:#a47de0;
-  font-size:12px;
-  letter-spacing:2px;
-  margin-bottom:12px;
-}
-
-.vouches-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:12px;
-}
-
-.vouch{
-  background:linear-gradient(145deg,#1a1727,#141220);
-  border:1px solid #2e2b4a;
-  border-radius:12px;
-  padding:16px;
-}
-
-.vouch-header{
-  display:flex;
-  gap:10px;
-  margin-bottom:10px;
-}
-
-.vouch-avatar{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:#7c5cbf;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:700;
-  color:white;
-}
-
-.vouch-name{font-weight:600;}
-.vouch-text{color:#8b82a7;}
-</style>
-
-</head>
-<body>
-${sections}
-</body>
-</html>`;
-
-  const blob = new Blob([html], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "vouch-visuals.html";
-  a.click();
-
-  URL.revokeObjectURL(url);
-}
-
 </script>
 
 </body>
